@@ -1,3 +1,4 @@
+import 'package:contactphone/my_contact_list.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -47,7 +48,10 @@ class _ContactAppState extends State<ContactApp> {
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       themeMode: _themeMode,
-      home: ,
+      home: MyContactList(
+        onToggleTheme: _toggleTheme ,
+        isdarkMode:  _themeMode == ThemeMode.dark,
+      ) ,
     );
   }
 }
