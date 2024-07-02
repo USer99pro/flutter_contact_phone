@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main{
+void main() {
   runApp(const ContactApp());
 }
 
@@ -21,18 +21,33 @@ class _ContactAppState extends State<ContactApp> {
     _loadsThemeModoe();
   }
 
-
-
-
-  void _loadsThemeModoe() async{
+  void _loadsThemeModoe() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      _themeMode = (prefs.getBool('isDarkMode') ?? false)
+          ? ThemeMode.dark
+          : ThemeMode.light;
+    });
   }
 
-
-
+  void _toggleTheme(bool isDarkMode) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _themeMode = isDarkMode ? ThemeMode.dark : ThemeMode.light;
+    });
+    await prefs.setBool('isDarkMode', isDarkMode);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'สมุดโทรศํพท์',
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: _themeMode,
+      home: ,
+    );
   }
 }
