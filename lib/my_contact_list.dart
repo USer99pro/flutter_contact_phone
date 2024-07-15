@@ -2,6 +2,7 @@ import 'package:contactphone/contact.dart';
 import 'package:contactphone/contact_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:contactphone/contact.dart';
 
 class MyContactList extends StatefulWidget {
   final Function(bool) onToggleTheme;
@@ -19,6 +20,26 @@ class MyContactList extends StatefulWidget {
 
 class _MyContactListState extends State<MyContactList> {
   late List<contact> contactData;
+  TextEditingController serarchController  = TextEditingController();
+  late List<contact> filteredContact;
+
+  void filterFx(String query){
+    if(query.isEmpty){
+      filteredContact = List.from(contactData);
+    }else{
+      filteredContact = contactData.where((contact)=>
+        contact.name.toLowerCase().contains(query.toLowerCase()) ||
+        contact.phonenumber.contains(query)).toList();
+      
+    }
+  }
+
+
+  void _onSeachChanged(){
+    filterFx(serarchController.text);
+
+  }
+
 
   @override
   void initState() {
@@ -30,6 +51,9 @@ class _MyContactListState extends State<MyContactList> {
       contact('อาร์ม', '0618096515', '3.jpg'),
       contact('นิติพัฒน์', '0610541331', '4.jpg'),
     ];
+    // filteredContact = contactData;
+    filteredContact = List.from(contactData);
+    serarchController.addListener(_onSeachChanged);
   }
 
   void _MakePhoneCall(String phonenumber) async {
@@ -59,6 +83,7 @@ class _MyContactListState extends State<MyContactList> {
           Padding(
             padding: const EdgeInsets.all(0.8),
             child: TextField(
+                controller: serarchController ,
                 decoration: InputDecoration(
                     labelText: "ค้นหารายชื่อ",
                     prefixIcon: const Icon(Icons.search),
@@ -68,7 +93,7 @@ class _MyContactListState extends State<MyContactList> {
           ),
           Expanded(
               child: ContactListWidget(
-            contacts: contactData,
+            contacts:filteredContact ,
             onCall: _MakePhoneCall,
           ))
         ],
