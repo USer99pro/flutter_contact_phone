@@ -20,26 +20,26 @@ class MyContactList extends StatefulWidget {
 
 class _MyContactListState extends State<MyContactList> {
   late List<contact> contactData;
-  TextEditingController serarchController  = TextEditingController();
+  TextEditingController serarchController = TextEditingController();
   late List<contact> filteredContact;
+  
+  
 
-  void filterFx(String query){
-    if(query.isEmpty){
+  void filterFx(String query) {
+    if (query.isEmpty) {
       filteredContact = List.from(contactData);
-    }else{
-      filteredContact = contactData.where((contact)=>
-        contact.name.toLowerCase().contains(query.toLowerCase()) ||
-        contact.phonenumber.contains(query)).toList();
-      
+    } else {
+      filteredContact = contactData
+          .where((contact) =>
+              contact.name.toLowerCase().contains(query.toLowerCase()) ||
+              contact.phonenumber.contains(query))
+          .toList();
     }
   }
 
-
-  void _onSeachChanged(){
+  void _onSeachChanged() {
     filterFx(serarchController.text);
-
   }
-
 
   @override
   void initState() {
@@ -57,15 +57,45 @@ class _MyContactListState extends State<MyContactList> {
   }
 
   void _MakePhoneCall(String phonenumber) async {
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: phonenumber
-  
-    );
-
+    final Uri launchUri = Uri(scheme: 'tel', path: phonenumber);
     await launchUrl(launchUri);
   }
+
+  Future<void> _openWhatApp(String phonenumber,
+      {bool isVideoCall = false}) async {
+    if (phonenumber.isEmpty) {
+      print('เบอร์โทรสัพท์ไม่ถูกต้อง');
+      return;
+    }
+     String formattedNumber = phonenumber;
+    if(!formattedNumber.startsWith('+66')){
+      formattedNumber = '+66$formattedNumber';
+    }
+
+  final Uri whatsappUri = isVideoCall
+      ? Uri.parse('whatsapp://call?phone=$formattedNumber&video=1')
+      : Uri.parse('whatsapp://call?phone=$formattedNumber');
+
+  try{
+    if(await canLaunchUrl(whatsappUri)){
+      await launchUrl(whatsappUri);
+    }else{
+      final Uri webWhatAppUri = Uri.parse('https://wa.me/$formattedNumber&video=1');
+        if(await canLaunchUrl(webWhatAppUri)){
+          await launchUrl(webWhatAppUri);
+        }else{
+          throw 'ไม่สามารถเปิด WhatsApp หรือ เว็บไซต์ WhatsApp ได้';
+        }
+    }
+  }catch(e){
+    print('เกิดข้อผิดพลาดในการเปิด WhatsApp : $e ');
+  }
+
+  }
+
  
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +113,7 @@ class _MyContactListState extends State<MyContactList> {
           Padding(
             padding: const EdgeInsets.all(0.8),
             child: TextField(
-                controller: serarchController ,
+                controller: serarchController,
                 decoration: InputDecoration(
                     labelText: "ค้นหารายชื่อ",
                     prefixIcon: const Icon(Icons.search),
@@ -93,8 +123,9 @@ class _MyContactListState extends State<MyContactList> {
           ),
           Expanded(
               child: ContactListWidget(
-            contacts:filteredContact ,
+            contacts: filteredContact,
             onCall: _MakePhoneCall,
+            onChat: _openWhatApp,
           ))
         ],
       ),
